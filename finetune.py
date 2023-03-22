@@ -51,7 +51,7 @@ model = LlamaForCausalLM.from_pretrained(
     torch_dtype=torch.float16,
     device_map=device_map,
 )
-model = PeftModel.from_pretrained(model, LORA_WEIGHTS, torch_dtype=torch.float16)
+model.load_state_dict(model.state_dict())
 tokenizer = LlamaTokenizer.from_pretrained(
     model_name, add_eos_token=True
 )
