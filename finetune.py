@@ -32,6 +32,7 @@ LORA_DROPOUT = 0.05
 VAL_SET_SIZE = 2000
 TARGET_MODULES = [
     "q_proj",
+    "k_proj",
     "v_proj",
 ]
 DATA_PATH = "alpaca_data_cleaned.json"
@@ -44,13 +45,15 @@ if ddp:
     device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)}
     GRADIENT_ACCUMULATION_STEPS = GRADIENT_ACCUMULATION_STEPS // world_size
 
+#model_name = "decapoda-research/llama-7b-hf"
+model_name = "bigscience/bloom-560m"
 model = LlamaForCausalLM.from_pretrained(
-    "decapoda-research/llama-7b-hf",
+    model_name, 
     load_in_8bit=True,
     device_map=device_map,
 )
 tokenizer = LlamaTokenizer.from_pretrained(
-    "decapoda-research/llama-7b-hf", add_eos_token=True
+    model_name, add_eos_token=True
 )
 
 model = prepare_model_for_int8_training(model)
@@ -71,23 +74,23 @@ data = load_dataset("json", data_files=DATA_PATH)
 def generate_prompt(data_point):
     # sorry about the formatting disaster gotta move fast
     if data_point["input"]:
-        return f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+        return f"""以下は、タスクを説明する命令と、さらなるコンテキストを提供する入力の組み合わせです。要求を適切に満たすような応答をしてください。
 
-### Instruction:
+### 命令:
 {data_point["instruction"]}
 
-### Input:
+### 入力:
 {data_point["input"]}
 
-### Response:
+### 出力:
 {data_point["output"]}"""
     else:
-        return f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
+        return f"""以下は、ある作業を記述した指示です。要求を適切に満たすような応答をしてください。
 
-### Instruction:
+### 命令:
 {data_point["instruction"]}
 
-### Response:
+### 出力:
 {data_point["output"]}"""
 
 
@@ -111,25 +114,25 @@ def generate_and_tokenize_prompt(data_point):
     # so that our loss is computed only on the response.
     user_prompt = (
         (
-            f"""Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+            f"""以下は、タスクを説明する命令と、さらなるコンテキストを提供する入力の組み合わせです。要求を適切に満たすような応答をしてください。
 
-### Instruction:
+### 命令:
 {data_point["instruction"]}
 
-### Input:
+### 入力:
 {data_point["input"]}
 
-### Response:
+### 出力:
 """
         )
         if data_point["input"]
         else (
-            f"""Below is an instruction that describes a task. Write a response that appropriately completes the request.
+            f"""以下は、ある作業を記述した指示です。要求を適切に満たすような応答を書いてください。
 
-### Instruction:
+### 命令:
 {data_point["instruction"]}
 
-### Response:
+### :出力
 """
         )
     )
