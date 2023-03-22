@@ -45,13 +45,15 @@ if ddp:
 
 #model_name = "decapoda-research/llama-7b-hf"
 model_name = "bigscience/bloom-560m"
-model = LlamaForCausalLM.from_pretrained(
-    model_name, 
-    load_in_8bit=True,
-    torch_dtype=torch.float16,
-    device_map=device_map,
-)
+bloom_model = transformers.AutoModel.from_pretrained(model_name)
+model = LlamaForCausalLM()
 model.load_state_dict(model.state_dict())
+#model = LlamaForCausalLM.from_pretrained(
+#    model_name, 
+#    load_in_8bit=True,
+#    torch_dtype=torch.float16,
+#    device_map=device_map,
+#)
 tokenizer = LlamaTokenizer.from_pretrained(
     model_name, add_eos_token=True
 )
