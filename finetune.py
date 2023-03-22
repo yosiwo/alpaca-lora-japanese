@@ -48,6 +48,7 @@ model_name = "bigscience/bloom-560m"
 model = LlamaForCausalLM.from_pretrained(
     model_name, 
     load_in_8bit=True,
+    torch_dtype=torch.float16,
     device_map=device_map,
 )
 tokenizer = LlamaTokenizer.from_pretrained(
