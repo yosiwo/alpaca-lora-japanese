@@ -31,9 +31,7 @@ LORA_ALPHA = 16
 LORA_DROPOUT = 0.05
 VAL_SET_SIZE = 2000
 TARGET_MODULES = [
-    "q_proj",
-    "k_proj",
-    "v_proj",
+    "query_key_value"
 ]
 DATA_PATH = "alpaca_data_cleaned.json"
 OUTPUT_DIR = "lora-alpaca"
